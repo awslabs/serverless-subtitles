@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description:
+  Front application setup
+
+Resources:
+  SUBCognitoIdentityPool:
+    Type: "AWS::Cognito::IdentityPool"
+    Properties:
+      IdentityPoolName: "Subtitle"
+      AllowUnauthenticatedIdentities: true
+
+  SUBCognitoIdentityPoolRoleAttachment:
+    Type: "AWS::Cognito::IdentityPoolRoleAttachment"
+    Properties:
+      IdentityPoolId: !Ref SUBCognitoIdentityPool
+      Roles:
+        unauthenticated: !ImportValue SUBCognitoIdentityPoolRole
+        authenticated: !ImportValue SUBCognitoIdentityPoolRole
+Outputs:
+  SUBCognitoIdentityPool:
+    Value: !GetAtt SUBCognitoIdentityPool.Name
+    Description: "Cognito Identity Pool ARN"
+    Export:
+      Name: SUBCognitoIdentityPool

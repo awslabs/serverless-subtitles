@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description:
+  Storage layer for subtitle demonstration
+
+Resources:
+  SUBS3Media:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub
+        - subtitle.media.${U}.aws.com
+        - {U: !ImportValue SUBUsername}
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ['*']
+            AllowedMethods: [POST,GET,PUT,DELETE,HEAD]
+            AllowedOrigins: ['*']
+            ExposedHeaders: ['ETag']
+            MaxAge: '3600'
+      NotificationConfiguration:
+        LambdaConfigurations:
+          -
+            Function: !ImportValue SUBLambdaFunctionStart
+            Event: "s3:ObjectCreated:*"
+            Filter:
+              S3Key:
+                Rules:
+                  -
+                    Name: "prefix"
+                    Value: "0-input"
+
+  SUBLambdaFunctionStart:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !ImportValue SUBLambdaFunctionStart
+      Principal: "s3.amazonaws.com"
+      SourceArn: !GetAtt "SUBS3Media.Arn"
+
+  SUBBucketPolicyMedia:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref SUBS3Media
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "elastictranscoder.amazonaws.com"
+            Action: "s3:*"
+            Resource: !Sub
+              - "${b}/*"
+              - {b: !GetAtt SUBS3Media.Arn}
+          -
+            Effect: "Allow"
+            Principal:
+              Service: "transcribe.amazonaws.com"
+            Action: "s3:*"
+            Resource: !Sub
+              - "${b}/*"
+              - {b: !GetAtt SUBS3Media.Arn}
+          -
+            Effect: "Allow"
+            Principal:
+              Service: "lambda.amazonaws.com"
+            Action: "s3:*"
+            Resource: !Sub
+              - "${b}/*"
+              - {b: !GetAtt SUBS3Media.Arn}
+          -
+            Effect: "Allow"
+            Principal:
+              Federated: "cognito-identity.amazonaws.com"
+            Action: "s3:put*"
+            Resource: !Sub
+              - "${b}/0-input/*"
+              - {b: !GetAtt SUBS3Media.Arn}
+Outputs:
+  SUBS3Media:
+    Value: !GetAtt SUBS3Media.Arn
+    Description: "Subtitle S3 Media bucket ARN"
+    Export:
+      Name: SUBS3Media

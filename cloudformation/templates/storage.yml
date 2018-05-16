@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description:
+  Storage layer for subtitle demonstration
+
+Resources:
+  SUBS3Media:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub
+        - subtitle.media.${U}.aws.com
+        - {U: !ImportValue SUBUsername}
+
+  SUBLambdaPermissionStart:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !ImportValue SUBLambdaFunctionStart
+      Principal: "s3.amazonaws.com"
+      SourceArn: !GetAtt "SUBS3Media.Arn"
+  SUBLambdaPermissionTranscode:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !ImportValue SUBLambdaFunctionTranscode
+      Principal: "s3.amazonaws.com"
+      SourceArn: !GetAtt "SUBS3Media.Arn"
+  SUBLambdaPermissionTranscribe:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !ImportValue SUBLambdaFunctionTranscribe
+      Principal: "s3.amazonaws.com"
+      SourceArn: !GetAtt "SUBS3Media.Arn"
+  SUBLambdaPermissionTranslate:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !ImportValue SUBLambdaFunctionTranslate
+      Principal: "s3.amazonaws.com"
+      SourceArn: !GetAtt "SUBS3Media.Arn"
+  SUBLambdaPermissionOutput:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !ImportValue SUBLambdaFunctionOutput
+      Principal: "s3.amazonaws.com"
+      SourceArn: !GetAtt "SUBS3Media.Arn"

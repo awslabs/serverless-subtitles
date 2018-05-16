@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description:
+  Database layer for subtitle demonstration
+
+Resources:
+  SUBDynamoDBSubtitle:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      AttributeDefinitions:
+      -
+        AttributeName: "Id"
+        AttributeType: "S"
+      -
+        AttributeName: "State"
+        AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "Id"
+          KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      TableName: "subtitles"
+      GlobalSecondaryIndexes:
+        -
+          IndexName: "State-index"
+          KeySchema:
+            -
+              AttributeName: "State"
+              KeyType: "HASH"
+          Projection:
+            ProjectionType: "ALL"
+          ProvisionedThroughput:
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"

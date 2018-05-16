@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description:
+  State machine for the subtitle process
+
+Resources:
+  SUBStepFunctionsStateMachine:
+    Type: "AWS::StepFunctions::StateMachine"
+    Properties:
+      StateMachineName: "Subtitles"
+      DefinitionString: !Sub |-
+        {
+          "Comment": "A state machine that monitors a Job in Transcribe until it completes.",
+          "StartAt": "To transcode",
+          "States": {
+            "To transcode":{
+              "Type": "Task",
+              "Resource": "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:SUBLambdaFunctionTranscode",
+              "Next": "Wait transcoding to complete"
+            },
+            "Wait transcoding to complete":{
+              "Type": "Wait",
+              "Seconds": 60,
+              "Next": "To transcribe"
+            },
+            "To transcribe":{
+              "Type": "Task",
+              "Resource": "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:SUBLambdaFunctionTranscribe",
+              "Next": "Wait transcription to complete"
+            },
+            "Wait transcription to complete":{
+              "Type": "Wait",
+              "Seconds": 10,
+              "Next": "Get Job Status"
+            },
+            "Get Job Status": {
+              "Type": "Task",
+              "Resource": "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:SUBLambdaFunctionTranscribeIsOver",
+              
+              "Next": "Job Complete?"
+            },
+            "Job Complete?": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.status",
+                  "StringEquals": "FAILED",
+                  "Next": "Job Failed"
+                },
+                {
+                  "Variable": "$.status",
+                  "StringEquals": "COMPLETED",
+                  "Next": "To translate"
+                }
+              ],
+              "Default": "Wait transcription to complete"
+            },
+            "Job Failed": {
+              "Type": "Fail",
+              "Cause": "AWS Transcribe Job Failed",
+              "Error": "DescribeJob returned FAILED"
+            },
+            "To translate": {
+              "Type": "Task",
+              "Resource": "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:SUBLambdaFunctionTranslate",
+              "Next": "To output"
+            },
+            "To output": {
+              "Type": "Task",
+              "Resource": "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:SUBLambdaFunctionOutput",
+              "End": true
+            }
+          }
+        }
+      RoleArn: !ImportValue SUBStepFunctionLambdaExecutionRole

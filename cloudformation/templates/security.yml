@@ -1,0 +1,443 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description:
+  Security layer for subtitle demonstration
+
+Parameters:
+  Username:
+    Description: Unique username to fill in the S3 bucket
+    Type: String
+
+Resources:
+  SUBLambdaStartRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+      Policies:
+        -
+          PolicyName: "subtitle-lambda-start-policy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "s3:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "logs:*"
+                Resource: "arn:aws:logs:*:*:*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "states:*"
+                Resource: "*"
+      RoleName: "SubtitleLambdaStart"
+
+
+  SUBLambdaTranscodeRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonElasticTranscoder_FullAccess"
+        - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+      Policies:
+        -
+          PolicyName: "subtitle-lambda-transcode-policy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "s3:GetObject"
+                  - "s3:ListBucket"
+                Resource: !Sub "arn:aws:s3:::subtitles.{Username}.aws.com/*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                Resource: "arn:aws:logs:us-east-1::*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+      RoleName: "SubtitleLambdaTranscode"
+
+  SUBLambdaTranscribeRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+      Policies:
+        -
+          PolicyName: "subtitle-lambda-transcribe-policy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+              -
+                 Effect: "Allow"
+                 Action: "transcribe:*"
+                 Resource: "*"
+        -
+          PolicyName: "subtitle-transcribe-policy"
+          PolicyDocument:
+            Version: "2008-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "s3:Put*"
+                  - "s3:ListBucket"
+                  - "s3:*MultipartUpload*"
+                  - "s3:Get*"
+                Resource: "*"
+        -
+          PolicyName: "subtitle-state-machine-policy"
+          PolicyDocument:
+            Version: "2008-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "states:*"
+                Resource: "*"
+      RoleName: "SubtitleLambdaTranscribe"
+
+  SUBLambdaTranscribeIsOverRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+                - "transcribe.amazonaws.com"
+
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+      Policies:
+        -
+          PolicyName: "subtitle-lambda-transcribe-policy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+              -
+                 Effect: "Allow"
+                 Action: "transcribe:*"
+                 Resource: "*"
+        -
+          PolicyName: "subtitle-transcribe-policy"
+          PolicyDocument:
+            Version: "2008-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "s3:Put*"
+                  - "s3:ListBucket"
+                  - "s3:*MultipartUpload*"
+                  - "s3:Get*"
+                Resource: "*"
+      RoleName: "SubtitleLambdaTranscribeIsOver"
+
+  SUBLambdaTranslateRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+      Policies:
+        -
+          PolicyName: "subtitle-lambda-translate-policy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+              -
+                Effect: "Allow"
+                Action: "translate:*"
+                Resource: "*"
+              -
+                 Effect: "Allow"
+                 Action: "transcribe:*"
+                 Resource: "*"
+              -
+                 Effect: "Allow"
+                 Action:
+                   - "s3:*"
+                 Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - "lambda:*"
+                Resource: "*"
+      RoleName: "SubtitleLambdaTranslate"
+
+  SUBLambdaOutputRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+      Policies:
+        -
+          PolicyName: "subtitle-lambda-output-policy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+              -
+                Effect: "Allow"
+                Action: "s3:*"
+                Resource: "*"
+      RoleName: "SubtitleLambdaOutput"
+
+  SUBElasticTranscoderRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "elastictranscoder.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "subtitle-elasticstranscoder-policy"
+          PolicyDocument:
+            Version: "2008-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "s3:Put*"
+                  - "s3:ListBucket"
+                  - "s3:*MultipartUpload*"
+                  - "s3:Get*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action: "sns:Publish"
+                Resource: "*"
+              -
+                Effect: "Deny"
+                Action:
+                  - "s3:*Delete*"
+                  - "s3:*Policy*"
+                  - "sns:*Remove*"
+                  - "sns:*Delete*"
+                  - "sns:*Permission*"
+                Resource: "*"
+      RoleName: "SubtitleElasticTranscoder"
+
+  SUBStepFunctionLambdaExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - !Sub states.${AWS::Region}.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: StatesExecutionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource: "*"
+      RoleName: "SubtitleLambdaExecution"
+
+  SUBCognitoIdentityPoolRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Federated: "cognito-identity.amazonaws.com"
+            Action:
+              - "sts:AssumeRoleWithWebIdentity"
+      Path: "/"
+      Policies:
+        - PolicyName: CognitoIdentityPoolPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "mobileanalytics:PutEvents"
+                  - "cognito-sync:*"
+                Resource: "*"
+              - Effect: "Allow"
+                Action:
+                  - "s3:put*"
+                Resource: !Sub
+                  - "arn:aws:s3:::subtitle.media.${U}.aws.com/0-input/*"
+                  - {U: !Ref Username}
+              - Effect: "Allow"
+                Action:
+                  - "s3:get*"
+                  - "s3:list*"
+                Resource: !Sub
+                  - "arn:aws:s3:::subtitle.static.${U}.aws.com/*"
+                  - {U: !Ref Username}
+              - Effect: "Allow"
+                Action:
+                  - "dynamodb:Query"
+                  - "dynamodb:Scan"
+                Resource:
+                  - !Sub "arn:aws:dynamodb:us-east-1:${AWS::AccountId}:table/subtitles"
+                  - !Sub "arn:aws:dynamodb:us-east-1:${AWS::AccountId}:table/subtitles/index/State-index"
+      RoleName: "SubtitleCognitoIdentityPool"
+
+Outputs:
+  SUBLambdaStartRole:
+    Value: !GetAtt SUBLambdaStartRole.Arn
+    Description: "Role for the lambda that start the whole process"
+    Export:
+      Name: SUBLambdaStartRole
+  SUBLambdaTranscodeRole:
+    Value: !GetAtt SUBLambdaTranscodeRole.Arn
+    Description: "Role for the lambda that transcodes"
+    Export:
+      Name: SUBLambdaTranscodeRole
+  SUBLambdaTranscribeRole:
+    Value: !GetAtt SUBLambdaTranscribeRole.Arn
+    Description: "Role for the lambda that transcribe"
+    Export:
+      Name: SUBLambdaTranscribeRole
+  SUBLambdaTranscribeIsOverRole:
+    Value: !GetAtt SUBLambdaTranscribeIsOverRole.Arn
+    Description: "Role for the lambda that checks that transcription is over"
+    Export:
+      Name: SUBLambdaTranscribeIsOverRole
+  SUBLambdaTranslateRole:
+    Value: !GetAtt SUBLambdaTranslateRole.Arn
+    Description: "Role for the lambda that translate"
+    Export:
+      Name: SUBLambdaTranslateRole
+  SUBLambdaOutputRole:
+    Value: !GetAtt SUBLambdaOutputRole.Arn
+    Description: "Role for the lambda that translate"
+    Export:
+      Name: SUBLambdaOutputRole
+  SUBStepFunctionLambdaExecutionRole:
+    Value: !GetAtt SUBStepFunctionLambdaExecutionRole.Arn
+    Description: "Role for the step functions"
+    Export:
+      Name: SUBStepFunctionLambdaExecutionRole
+  SUBCognitoIdentityPoolRole:
+    Value: !GetAtt SUBCognitoIdentityPoolRole.Arn
+    Description: "Role for Cognito identity role endossed by unauthenticated user "
+    Export:
+      Name: SUBCognitoIdentityPoolRole
+  Username:
+    Value: !Ref Username
+    Description: "Unique username for the S3 buckets"
+    Export:
+      Name: SUBUsername

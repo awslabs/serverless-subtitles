@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="./css/ladda.min.css">
+
+    <style type="text/css">
+       body { background: #28a745 !important; }
+    </style>
+
+    <script defer src="./js/fontawesome-all.min.js"></script>
+
+
+
+    <title>Serverless Subtitles</title>
+  </head>
+  <body>
+    <hr class="invisible">
+    <div class="container">
+      <div class="row">
+        <div class="col-4">
+
+          <div class="jumbotron">
+            <div class="container">
+              <h1 class="display-6 text-success">Serverless Subtitles <i class="far fa-comment-alt"></i></h1>
+              <p class="lead">
+                This is a simple service to generate subtitle from a video in another language
+                <a href="#" id="toggleConstraints"> <i class="fas fa-caret-down text-success"></i> </a>
+              </p>
+              <div id="constraints" class="d-none">
+                Constraints :
+                <ul>
+                  <li> MP4 only </li>
+                  <li> English spoking only </li>
+                  <li> Maximum of 150Mb </li>
+                  <li> Maximum of 2 concurrent workers (or whatever is your limit in AWS transcribe)</li>
+                </ul>
+              </div>
+
+              <div class="text-center">
+                <!-- <button class="ladda-button" data-style="slide-right" data-color="red" id="refresh"><span class="ladda-label">List</span></button> -->
+              </div>
+
+              <p class="lead">
+                <div class="form-group">
+                  <input type="file" id="file" accept="video/*" class="form-control-sm">
+                </div>
+                <div class="error">
+                  <div class="alert text-danger text-center d-none" role="alert" id="uploadError">
+                    You must select a file
+                  </div>
+                </div>
+                 <div class="form-group">
+                   <div class="text-center">
+                     <button class="ladda-button" data-style="slide-right" data-color="red" id="upload"><span class="ladda-label">Upload <i class="fas fa-cloud-upload-alt"></i></span></button>
+                   </div>
+                </div>
+              </p>
+            </div>
+
+          </div>
+
+          <div class="text-center text-white">
+            <small>&copy; 2018</small> <i class="fab fa-aws"></i>
+          </div>
+
+        </div>
+        <div class="col-8 jumbotron">
+          <div id="video" class="text-center">
+            <video controls height="240" width="320">
+
+            </video>
+
+          </div>
+          <div id="current" class="list-group"> </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.92.0.min.js"></script>
+
+    <script src="./js/spin.min.js"></script>
+    <script src="./js/ladda.min.js"></script>
+
+    <script src="./js/script.js"></script>
+
+  </body>
+</html>

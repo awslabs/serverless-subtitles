@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description:
+  Storage static layer for subtitle demonstration
+
+Resources:
+  SUBS3Static:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub
+        - "subtitle.static.${U}.aws.com"
+        - {U: !ImportValue SUBUsername}
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ['*']
+            AllowedMethods: [POST,GET,PUT,DELETE,HEAD]
+            AllowedOrigins: ['*']
+            ExposedHeaders: [Date]
+            MaxAge: '3600'
+      WebsiteConfiguration:
+        IndexDocument: "index.html"
+        ErrorDocument: "error.html"
+
+  SUBS3BucketPolicyStatic:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref SUBS3Static
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal: "*"
+            Action:
+              - "s3:GetObject"
+            Resource: !Sub
+              - "${b}/*"
+              - {b: !GetAtt SUBS3Static.Arn }
+
+Outputs:
+  SUBS3Static:
+    Value: !GetAtt SUBS3Static.Arn
+    Description: "Static bucket arn"
+    Export:
+      Name: SUBS3Static
+  SUBS3StaticWebsite:
+    Value: !GetAtt SUBS3Static.WebsiteURL
+    Description: "Static website url"
+    Export:
+      Name: SUBS3StaticWebsite

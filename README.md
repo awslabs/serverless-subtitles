@@ -3,7 +3,7 @@
 Serverless Subtitles is a demonstration project which allows you to prove the
 usage of several AWS Products.
 
-Courtesy of Maxime THOMAS - maxthom@amazon.com
+Original idea by Maxime THOMAS - maxthom@amazon.com
 Open Source Code under [Apache License](LICENSE)
 
 ## Pitch

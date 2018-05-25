@@ -49,7 +49,11 @@ Resources:
             Principal:
               Service:
                 - "elastictranscoder.amazonaws.com"
-            Action: "s3:*"
+            Action:
+              - "s3:Get*"
+              - "s3:ListBucket"
+              - "s3:Put*"
+              - "s3:*MultipartUpload*"
             Resource: !Sub
               - "${b}/*"
               - {b: !GetAtt SUBS3Media.Arn}
@@ -57,7 +61,8 @@ Resources:
             Effect: "Allow"
             Principal:
               Service: "transcribe.amazonaws.com"
-            Action: "s3:*"
+            Action:
+              - “s3:GetObject”
             Resource: !Sub
               - "${b}/*"
               - {b: !GetAtt SUBS3Media.Arn}
@@ -65,18 +70,23 @@ Resources:
             Effect: "Allow"
             Principal:
               Service: "lambda.amazonaws.com"
-            Action: "s3:*"
+            Action:
+              - "s3:Get*"
+              - "s3:ListBucket"
+              - "s3:Put*"
+              - "s3:*MultipartUpload*"
             Resource: !Sub
               - "${b}/*"
               - {b: !GetAtt SUBS3Media.Arn}
           -
             Effect: "Allow"
             Principal:
-              Federated: "cognito-identity.amazonaws.com"
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:role/SubtitleCognitoIdentityPool"
             Action: "s3:put*"
             Resource: !Sub
-              - "${b}/0-input/*"
+              - "${b}/*"
               - {b: !GetAtt SUBS3Media.Arn}
+
 Outputs:
   SUBS3Media:
     Value: !GetAtt SUBS3Media.Arn

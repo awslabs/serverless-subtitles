@@ -11,6 +11,121 @@ var SUB = {
   ]
 };
 
+class Step extends React.Component{
+  render(){
+    const item = this.props.item;
+    const step = this.props.step;
+    if ( item.State.S == step && step === "DONE" ){
+      return( <small className="text-success">{step}</small> )
+    } else if ( item.State.S == step ){
+      return ( <small className="text-info">{step} </small> )
+    } else if ( SUB.steps.indexOf(step) < SUB.steps.indexOf(item.State.S) ) {
+      return ( <small> {step} | </small> )
+    } else {
+      return (null)
+    }
+  }
+}
+
+class Steps extends React.Component{
+  render(){
+    const item = this.props.item;
+    const steps = SUB.steps.map((step) =>
+      <Step item={item} step={step} key={step}/>
+    );
+    return (
+      <div>{steps}</div>
+    );
+  }
+}
+
+class IconState extends React.Component{
+  constructor(props){
+    super(props);
+    this.state = {state: props.state};
+  }
+  update(){
+    this.setState(function(prevState, props) {
+      return {
+        state: props.state
+      };
+    });
+  }
+  componentDidMount() {
+    this.timerID = setInterval(
+      () => this.update(),
+      500
+    );
+  }
+  componentWillUnmount() {
+    clearInterval(this.timerID);
+  }
+  render(){
+    if ( this.state.state === "DONE" ){
+      return (<i className="fas fa-play"></i>)
+    } else {
+      console.log("STATE", this.state.state);
+      return (<i className="fas fa-spinner fa-pulse"></i>)
+    }
+  }
+}
+
+class Item extends React.Component{
+  render(){
+    const item = this.props.item;
+    return(
+      <a className="list-group-item list-group-item-action flex-column align-items-start"
+      id={this.props.item.Id.S} key={this.props.item.Id.S} href="#" onClick={showVideo}>
+        <div className="d-flex w-100 justify-content-between">
+          <h5 className="mb-1">{this.props.item.FileKey.S}</h5>
+          <small>
+            <IconState state={this.props.item.State.S} />
+          </small>
+        </div>
+        <small>{this.props.item.Id.S} / {this.props.item.Created.S}</small>
+        <Steps item={this.props.item} />
+      </a>
+    )
+  }
+}
+
+class ItemList extends React.Component{
+  constructor(props){
+    super(props);
+    this.state = {items: props.list.Items};
+  }
+  update(){
+    getVideos(function(data){
+      this.setState({
+        items: data.Items
+      });
+    }.bind(this));
+  }
+  componentDidMount() {
+    this.timerID = setInterval(
+      () => this.update(),
+      500
+    );
+  }
+  componentWillUnmount() {
+    clearInterval(this.timerID);
+  }
+  render(){
+    if ( this.state.items.length ){
+      const listItems = this.state.items.map((item) =>
+        <Item item={item} key={item.Id.S}/>
+      );
+      return (
+        <div>{listItems}</div>
+      )
+    } else {
+      return (
+        <li className="list-group-item">No results</li>
+      )
+    }
+  }
+}
+
 // Upload a file in multi part to the mediaBucket
 var upload = function(callback){
   var file = $('#file')[0].files[0];
@@ -75,76 +190,10 @@ var showVideo = function(e){
 //Show the list
 var showList = function(){
   getVideos(function(data){
-    $("#current").empty();
-
-    var div = document.getElementById("current");
-    if ( data.Items.length ){
-      $.each(data.Items, function(k,item){
-        var a = document.createElement("a");
-        a.setAttribute("class", "list-group-item list-group-item-action flex-column align-items-start");
-        a.setAttribute("id", item.Id.S);
-
-        var contentDiv = document.createElement("div");
-        contentDiv.setAttribute("class", "d-flex w-100 justify-content-between");
-
-        var title = document.createElement("h5");
-        title.setAttribute("class", "mb-1");
-        title.append(document.createTextNode(item.FileKey.S))
-        contentDiv.append(title);
-
-        var small = document.createElement("small");
-
-        var state = document.createElement("i");
-        if ( item.State.S === "DONE" ){
-          state.setAttribute("class", "fas fa-play");
-        } else {
-          state.setAttribute("class", "fas fa-spinner fa-pulse");
-        }
-        small.append(state);
-
-        contentDiv.append(title);
-        contentDiv.append(small);
-
-        var small2 = document.createElement("small");
-        small2.append(
-          document.createTextNode(item.Id.S + " / " + item.Created.S)
-        );
-
-        var statusList = document.createElement("div");
-        $.each(SUB.steps, function(k,statusText){
-          var small3 = document.createElement("small");
-          small3.append(document.createTextNode(statusText));
-          if ( statusText === "DONE" ){
-            small3.setAttribute("class", "text-success");
-            statusList.append(small3);
-          } else if ( item.State.S == statusText ){
-            small3.setAttribute("class", "text-info");
-            statusList.append(small3);
-            return false;
-          } else {
-            statusList.append(small3);
-            statusList.append(document.createTextNode(" | "));
-          }
-        });
-
-        a.append(contentDiv);
-        a.append(small2);
-        a.append(statusList);
-
-        if ( item.State.S === "DONE" ){
-          a.setAttribute("href", "#");
-          $(a).click(showVideo);
-        }
-
-        div.append(a);
-      });
-    } else {
-      var li = document.createElement("li");
-      li.setAttribute("class", "list-group-item");
-      li.append(document.createTextNode("No results"));
-      div.append(li);
-    }
-    setTimeout(showList, 500);
+    ReactDOM.render(
+      <ItemList list={data}/>,
+      document.getElementById('current-react')
+    );
   });
 };
 
@@ -172,16 +221,16 @@ $(document).ready(function(){
       IdentityPoolId: data.cognitoIdentityPool
     });
 
-    staticBucketArray = data.staticBucket.split(":");
-    staticBucket = staticBucketArray[ staticBucketArray.length - 1];
+    var staticBucketArray = data.staticBucket.split(":");
+    var staticBucket = staticBucketArray[ staticBucketArray.length - 1];
 
     SUB.staticBucket = new AWS.S3({
       apiVersion: '2006-03-01',
       params: {Bucket: staticBucket}
     });
 
-    mediaBucketArray = data.mediaBucket.split(":");
-    mediaBucket = mediaBucketArray[ mediaBucketArray.length - 1];
+    var mediaBucketArray = data.mediaBucket.split(":");
+    var mediaBucket = mediaBucketArray[ mediaBucketArray.length - 1];
 
     SUB.mediaBucket = new AWS.S3({
       apiVersion: '2006-03-01',

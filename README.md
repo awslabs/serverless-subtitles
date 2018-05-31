@@ -27,6 +27,7 @@ Examples of the different VTT format files generated :
 
 ## TL;DR
 
+This is working *only* in us-east-1 region so far.
 
     $ cd cloudformation;
     $ export USERNAME=<unique user id with only chars>

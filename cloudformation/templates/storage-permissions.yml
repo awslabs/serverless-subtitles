@@ -54,18 +54,26 @@ Resources:
               - "s3:ListBucket"
               - "s3:Put*"
               - "s3:*MultipartUpload*"
-            Resource: !Sub
-              - "${b}/*"
-              - {b: !GetAtt SUBS3Media.Arn}
+            Resource:
+              - !Sub
+                - "arn:aws:s3:::subtitle.media.${u}.aws.com/*"
+                - {u: !ImportValue SUBUsername}
+              - !Sub
+                - "arn:aws:s3:::subtitle.media.${u}.aws.com"
+                - {u: !ImportValue SUBUsername}
           -
             Effect: "Allow"
             Principal:
               Service: "transcribe.amazonaws.com"
             Action:
-              - “s3:GetObject”
-            Resource: !Sub
-              - "${b}/*"
-              - {b: !GetAtt SUBS3Media.Arn}
+              - "s3:GetObject"
+            Resource:
+              - !Sub
+                - "arn:aws:s3:::subtitle.media.${u}.aws.com/*"
+                - {u: !ImportValue SUBUsername}
+              - !Sub
+                - "arn:aws:s3:::subtitle.media.${u}.aws.com"
+                - {u: !ImportValue SUBUsername}
           -
             Effect: "Allow"
             Principal:
@@ -75,18 +83,25 @@ Resources:
               - "s3:ListBucket"
               - "s3:Put*"
               - "s3:*MultipartUpload*"
-            Resource: !Sub
-              - "${b}/*"
-              - {b: !GetAtt SUBS3Media.Arn}
+            Resource:
+              - !Sub
+                - "arn:aws:s3:::subtitle.media.${u}.aws.com/*"
+                - {u: !ImportValue SUBUsername}
+              - !Sub
+                - "arn:aws:s3:::subtitle.media.${u}.aws.com"
+                - {u: !ImportValue SUBUsername}
           -
             Effect: "Allow"
             Principal:
               AWS: !Sub "arn:aws:iam::${AWS::AccountId}:role/SubtitleCognitoIdentityPool"
             Action: "s3:put*"
-            Resource: !Sub
-              - "${b}/*"
-              - {b: !GetAtt SUBS3Media.Arn}
-
+            Resource:
+              - !Sub
+                - "arn:aws:s3:::subtitle.media.${u}.aws.com/*"
+                - {u: !ImportValue SUBUsername}
+              - !Sub
+                - "arn:aws:s3:::subtitle.media.${u}.aws.com"
+                - {u: !ImportValue SUBUsername}
 Outputs:
   SUBS3Media:
     Value: !GetAtt SUBS3Media.Arn

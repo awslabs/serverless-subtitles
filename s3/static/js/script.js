@@ -64,7 +64,6 @@ class IconState extends React.Component{
     if ( this.state.state === "DONE" ){
       return (<i className="fas fa-play"></i>)
     } else {
-      console.log("STATE", this.state.state);
       return (<i className="fas fa-spinner fa-pulse"></i>)
     }
   }

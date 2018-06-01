@@ -61,11 +61,11 @@ class IconState extends React.Component{
     clearInterval(this.timerID);
   }
   render(){
-    if ( this.state.state === "DONE" ){
-      return (<i className="fas fa-play"></i>)
-    } else {
-      return (<i className="fas fa-spinner fa-pulse"></i>)
+    var icon = <i className="fas fa-spinner fa-pulse"></i>
+    if ( this.state.state === "DONE"){
+      icon = <i className="fas fa-play"></i>;
     }
+    return (<small>{icon}</small>)
   }
 }
 
@@ -77,9 +77,7 @@ class Item extends React.Component{
       id={this.props.item.Id.S} key={this.props.item.Id.S} href="#" onClick={showVideo}>
         <div className="d-flex w-100 justify-content-between">
           <h5 className="mb-1">{this.props.item.FileKey.S}</h5>
-          <small>
-            <IconState state={this.props.item.State.S} />
-          </small>
+          <IconState state={this.props.item.State.S} />
         </div>
         <small>{this.props.item.Id.S} / {this.props.item.Created.S}</small>
         <Steps item={this.props.item} />

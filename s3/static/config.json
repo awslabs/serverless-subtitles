@@ -1,1 +1,0 @@
-{"mediaBucket": "arn:aws:s3:::subtitle.media.maxthom.aws.com", "staticBucket":"arn:aws:s3:::subtitle.static.maxthom.aws.com", "cognitoIdentityPool":"us-east-1:af773e52-4cec-480a-8db9-4efcfa31466b"}

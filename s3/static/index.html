@@ -13,9 +13,11 @@
        body { background: #28a745 !important; }
     </style>
 
-    <script defer src="./js/fontawesome-all.min.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
 
-
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
 
     <title>Serverless Subtitles</title>
   </head>
@@ -27,7 +29,7 @@
 
           <div class="jumbotron">
             <div class="container">
-              <h1 class="display-6 text-success">Serverless Subtitles <i class="far fa-comment-alt"></i></h1>
+              <h1 class="display-6 text-success">Serverless Subtitles <i class="far fa-comment-dots"></i></h1>
               <p class="lead">
                 This is a simple service to generate subtitle from a video in another language
                 <a href="#" id="toggleConstraints"> <i class="fas fa-caret-down text-success"></i> </a>
@@ -78,6 +80,8 @@
 
           </div>
           <div id="current" class="list-group"> </div>
+          <div id="current-react" class="list-group"> </div>
+
         </div>
       </div>
     </div>
@@ -93,7 +97,9 @@
     <script src="./js/spin.min.js"></script>
     <script src="./js/ladda.min.js"></script>
 
-    <script src="./js/script.js"></script>
+    <script type="text/babel" src="./js/script.js"></script>
+    <!-- <script type="text/babel" src="script.js"></script> -->
+
 
   </body>
 </html>

@@ -42,7 +42,7 @@ This is working *only* in us-east-1 region so far.
 Transcode is a service allowing you to transform videos.
 We use it to extract the sound of a MP4 file to a MP3 file.
 
-https://aws.amazon.com/fr/elastictranscoder/
+https://aws.amazon.com/en/elastictranscoder/
 
 
 
@@ -51,7 +51,7 @@ https://aws.amazon.com/fr/elastictranscoder/
 Transcribe is a service allowing you to transform speech to text.
 We use it to get the transcript of the MP3 file.
 
-https://aws.amazon.com/fr/transcribe/
+https://aws.amazon.com/en/transcribe/
 
 
 
@@ -60,8 +60,12 @@ https://aws.amazon.com/fr/transcribe/
 Translate is a service allowing you to translate text file in different
 languages. We use it to translate subtitle files.
 
-https://aws.amazon.com/fr/translate/
+https://aws.amazon.com/en/translate/
 
+
+## Solution Architecture
+
+![Architecture of the solution](./doc/drawio.jpg)
 
 
 ## Set up

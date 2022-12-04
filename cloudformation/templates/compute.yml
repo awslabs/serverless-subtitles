@@ -15,7 +15,7 @@ Resources:
       FunctionName: SUBLambdaFunctionStart
       Handler: "index.handler"
       Role: !ImportValue "SUBLambdaStartRole"
-      Runtime: "python2.7"
+      Runtime: "python3.7"
       Timeout: 10
 
   SUBLambdaFunctionTranscode:
@@ -29,7 +29,7 @@ Resources:
       FunctionName: SUBLambdaFunctionTranscode
       Handler: "index.handler"
       Role: !ImportValue "SUBLambdaTranscodeRole"
-      Runtime: "python2.7"
+      Runtime: "python3.7"
       Timeout: 10
 
   SUBLambdaFunctionTranscribe:
@@ -43,7 +43,7 @@ Resources:
       FunctionName: SUBLambdaFunctionTranscribe
       Handler: "index.handler"
       Role: !ImportValue "SUBLambdaTranscribeRole"
-      Runtime: "python2.7"
+      Runtime: "python3.7"
       Timeout: 10
 
   SUBLambdaFunctionTranscribeIsOver:
@@ -57,7 +57,7 @@ Resources:
       FunctionName: SUBLambdaFunctionTranscribeIsOver
       Handler: "index.handler"
       Role: !ImportValue "SUBLambdaTranscribeIsOverRole"
-      Runtime: "python2.7"
+      Runtime: "python3.7"
 
   SUBLambdaFunctionTranslate:
     Type: "AWS::Lambda::Function"
@@ -70,7 +70,7 @@ Resources:
       FunctionName: SUBLambdaFunctionTranslate
       Handler: "index.handler"
       Role: !ImportValue "SUBLambdaTranslateRole"
-      Runtime: "python2.7"
+      Runtime: "python3.7"
       Timeout: 60
 
   SUBLambdaFunctionOutput:
@@ -84,7 +84,7 @@ Resources:
       FunctionName: SUBLambdaFunctionOutput
       Handler: "index.handler"
       Role: !ImportValue "SUBLambdaOutputRole"
-      Runtime: "python2.7"
+      Runtime: "python3.7"
       Timeout: 10
 
 Outputs:

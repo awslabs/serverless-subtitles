@@ -36,6 +36,7 @@ Resources:
       FunctionName: !ImportValue SUBLambdaFunctionStart
       Principal: "s3.amazonaws.com"
       SourceArn: !GetAtt "SUBS3Media.Arn"
+      SourceAccount: !Sub ${AWS::AccountId}
 
   SUBBucketPolicyMedia:
     Type: "AWS::S3::BucketPolicy"

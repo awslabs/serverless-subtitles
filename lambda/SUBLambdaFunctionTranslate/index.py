@@ -1,5 +1,5 @@
 import boto3
-import urllib2
+import requests
 import json
 import re
 from datetime import timedelta
@@ -13,11 +13,8 @@ def callJobTranscription(event):
     response = transcribe.get_transcription_job(TranscriptionJobName=fileUUID)
     transcriptFileUri = response.get("TranscriptionJob") \
         .get("Transcript").get("TranscriptFileUri")
-    req = urllib2.Request(transcriptFileUri)
-    opener = urllib2.build_opener()
-    f = opener.open(req)
-    data = json.loads(f.read())
-    return data.get("results").get("items")
+    req = requests.get(transcriptFileUri)
+    return req.json()["results"]["items"]
 
 
 def makeVTTFile(items):
